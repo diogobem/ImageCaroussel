@@ -1,5 +1,3 @@
-let indexValue = 1;
-
 const slideLeft = document.querySelector('.slide.left');
 const slideRight = document.querySelector('.slide.right');
 const img = document.querySelectorAll('.carousel_img')
@@ -16,55 +14,48 @@ function addBtnSliders(img) {
         let btnSliderDiv = carousel.querySelector('.btn-sliders')
         const span = document.createElement('span')
         span.classList.add('sliderBox')
-        span.dataset.index = i + 1;
+        span.dataset.index = i;
         btnSliderDiv.append(span)
         span.addEventListener('click', btm_slider)
         if (i == 0) {
             span.style.background = 'white'
         }
     }
-
 }
 
 function btm_slider(e) {
-    let carousel = e.target.parentElement.parentElement
-    indexValue = e.target.dataset.index
-    showImage(carousel)
+    let carousel = e.target.closest("[data-carousel]")
+    const carouselImg = carousel.querySelector('[data-images]')
+    const activeImg = carousel.querySelector('[data-active]')
+    let indexValue = [...carouselImg.children].indexOf(activeImg)
+    let newIndex = e.target.dataset.index
+    showImage(carousel, indexValue, newIndex)
 }
 
 function side_slide(e) {
-
-    let carousel = e.target.parentElement.parentElement.parentElement
-    const carouselImg = carousel.querySelectorAll('.carousel_img')
+    let carousel = e.target.closest("[data-carousel]")
+    const carouselImg = carousel.querySelector('[data-images]')
+    const activeImg = carousel.querySelector('[data-active]')
+    let indexValue = [...carouselImg.children].indexOf(activeImg)
+    let newIndex;
     const direction = e.target.dataset.slider;
+    const imgLength = carouselImg.children.length
     if (direction === 'right') {
-        indexValue++
-        indexValue > carouselImg.length ? indexValue = 1 : indexValue
+        newIndex = indexValue + 1;
+        newIndex >= imgLength ? newIndex = 0 : newIndex
     } else {
-        indexValue--
-        indexValue == 0 ? indexValue = carouselImg.length : indexValue
+        newIndex = indexValue - 1;
+        newIndex < 0 ? newIndex = imgLength-1 : newIndex
     }
-    showImage(carousel)
+    showImage(carousel, indexValue, newIndex)
 }
 
-function showImage(carousel) {
+
+function showImage(carousel, indexValue, newIndex) {
     const slider = carousel.querySelectorAll('.btn-sliders span')
-    const carouselImg = carousel.querySelectorAll('.carousel_img')
-    for (i = 0; i < carouselImg.length; i++) {
-        carouselImg[i].style.display = 'none';
-        slider[i].style.background = 'none'
-    }
-
-    carouselImg[indexValue - 1].style.display = 'block'
-    slider[indexValue - 1].style.background = 'white'
-}
-
-function autoslide(interval){
-    setInterval(()=>{
-        const carousel = document.querySelector('.carousel')
-        const carouselImg = carousel.querySelectorAll('.carousel_img')
-        indexValue++;
-        indexValue > carouselImg.length ? indexValue = 1 : indexValue
-        showImage(carousel)
-    },interval)
+    const carouselImg = carousel.querySelector('[data-images]')
+    delete carouselImg.children[indexValue].dataset.active
+    carouselImg.children[newIndex].dataset.active = true
+    slider[newIndex].style.background = 'white'
+    slider[indexValue].style.background = 'none'
 }
